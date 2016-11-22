@@ -3,7 +3,7 @@
 %% Building model
 % The building is modeled as a 3-node thermal model.
 syms C_room C_floor C_return
-syms cpw mw_dot
+syms cp_w mw_dot
 syms T_room T_room_dot T_floor T_floor_dot T_ext T_return T_return_dot T_supply 
 syms K_fr K_ra K_wf 
 syms P_gains P_sol thermal_capacity_flow L
@@ -21,7 +21,7 @@ eq_floor = C_floor * T_floor_dot == - K_fr * (T_floor - T_room) + K_wf * (T_retu
 
 % L: floor heating flow fraction open [0..1]
 % mw_dot: current mass flow (= L * design mass flow)
-eq_return = C_return * T_return_dot == - K_wf * (T_return - T_floor) + cpw * mw_dot * (T_supply - T_return) + zero * (P_gains + P_sol + T_ext + T_room);
+eq_return = C_return * T_return_dot == - K_wf * (T_return - T_floor) + cp_w * mw_dot * (T_supply - T_return) + zero * (P_gains + P_sol + T_ext + T_room);
 
 %% State-space matrices
 states = [T_return T_floor T_room];
