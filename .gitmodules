@@ -1,0 +1,3 @@
+[submodule "carnot"]
+	path = carnot
+	url = git@github.com:neurobat/carnot.git
