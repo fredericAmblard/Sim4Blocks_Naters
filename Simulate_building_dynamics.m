@@ -25,7 +25,7 @@ Qdem = K_ra * (Tb_in(3)-Text)-Psol-Gin;
 % test = (Qdem + Qsup) - Qin;
 end
 
-function [Ab_d, Bb_d, K_fr,K_wf,K_ra, C_return, C_floor, thermal_capacity_flow, Qdot, facHP, nb] = get_state_input_mat_building(floor_heating_flow_fraction, sample_time)
+function [Ab_d, Bb_d, K_fr,K_wf,K_ra, C_WH, C_floor, thermal_capacity_flow, Qdot, facHP, nb] = get_state_input_mat_building(floor_heating_flow_fraction, sample_time)
 
 % Create the state matrix and the input matrix for the building system
 
@@ -35,28 +35,43 @@ function [Ab_d, Bb_d, K_fr,K_wf,K_ra, C_return, C_floor, thermal_capacity_flow, 
 % input vector for the building
 % u_b = [Text, Tws, Qaux]
 
-[C_return, C_floor, C_room, thermal_capacity_flow, K_wf, K_fr, K_ra, cp_w, Qdot, L_pipes] = get_param_building();
+[C_WH, C_floor, C_room, thermal_capacity_flow, K_wf, K_fr, K_ra, cp_w, Qdot, L_pipes] = get_param_building();
 mw_dot = thermal_capacity_flow * floor_heating_flow_fraction;
 
 % Fourier number
 Fo_1 = (K_fr*0.1*sample_time)/C_floor;
-Fo_2 = (K_wf*L_pipes*sample_time)/C_return;
+Fo_2 = (K_wf*L_pipes*sample_time)/C_WH;
 
+
+% A = [...
+% [ -(K_wf + 3*cp_w*mw_dot)/C_return,                                0,         (3*cp_w*mw_dot)/C_return,                  K_wf/C_return,                     0];
+% [                                0, -(K_wf + 3*cp_w*mw_dot)/C_return,                                0,                  K_wf/C_return,                     0];
+% [                                0,         (3*cp_w*mw_dot)/C_return, -(K_wf + 3*cp_w*mw_dot)/C_return,                  K_wf/C_return,                     0];
+% [                 K_wf/(2*C_floor),                 K_wf/(2*C_floor),                                0, -(2*K_fr + 2*K_wf)/(2*C_floor),          K_fr/C_floor];
+% [                                0,                                0,                                0,                    K_fr/C_room, -(K_fr + K_ra)/C_room] ...
+% ];
 
 A = [...
-[ -(K_wf + 3*cp_w*mw_dot)/C_return,                                0,         (3*cp_w*mw_dot)/C_return,                  K_wf/C_return,                     0];
-[                                0, -(K_wf + 3*cp_w*mw_dot)/C_return,                                0,                  K_wf/C_return,                     0];
-[                                0,         (3*cp_w*mw_dot)/C_return, -(K_wf + 3*cp_w*mw_dot)/C_return,                  K_wf/C_return,                     0];
-[                 K_wf/(2*C_floor),                 K_wf/(2*C_floor),                                0, -(2*K_fr + 2*K_wf)/(2*C_floor),          K_fr/C_floor];
-[                                0,                                0,                                0,                    K_fr/C_room, -(K_fr + K_ra)/C_room] ...
+[ -(K_fr + 3*K_wf)/C_floor,                   K_wf/C_floor,                   K_wf/C_floor,                   K_wf/C_floor,          K_fr/C_floor]
+[            (3*K_wf)/C_WH, -(3*(K_wf + cp_w*mw_dot))/C_WH,                              0,                              0,                     0]
+[            (3*K_wf)/C_WH,           (3*cp_w*mw_dot)/C_WH, -(3*(K_wf + cp_w*mw_dot))/C_WH,                              0,                     0]
+[            (3*K_wf)/C_WH,                              0,           (3*cp_w*mw_dot)/C_WH, -(3*(K_wf + cp_w*mw_dot))/C_WH,                     0]
+[              K_fr/C_room,                              0,                              0,                              0, -(K_fr + K_ra)/C_room]...
 ];
 
+% B = [...
+% [           0,                        0,        0,        0];
+% [           0, (3*cp_w*mw_dot)/C_return,        0,        0];
+% [           0,                        0,        0,        0];
+% [           0,                        0,        0,        0];
+% [ K_ra/C_room,                        0, 1/C_room, 1/C_room]...
+% ];
 B = [...
-[           0,                        0,        0,        0];
-[           0, (3*cp_w*mw_dot)/C_return,        0,        0];
-[           0,                        0,        0,        0];
-[           0,                        0,        0,        0];
-[ K_ra/C_room,                        0, 1/C_room, 1/C_room]...
+[           0,                    0,        0,        0]
+[           0, (3*cp_w*mw_dot)/C_WH,        0,        0]
+[           0,                    0,        0,        0]
+[           0,                    0,        0,        0]
+[ K_ra/C_room,                    0, 1/C_room, 1/C_room]...
 ];
 
 Ab_d = expm(sample_time*A);

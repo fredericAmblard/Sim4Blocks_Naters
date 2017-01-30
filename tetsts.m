@@ -2,11 +2,11 @@ clear all
 close all
 
 StartTime = 1;
-nb=2;
+nb=1;
 ChangeTime = 60*15; %secondes
 sample_time = [1 60 300 900]; % secondes
 %sample_time = [300]; % secondes
-Stop_Time = nb*3600./sample_time(:);
+Stop_Time =3*nb*3600./sample_time(:);
 
 for j=1:length(sample_time)
     StopTime =Stop_Time(j);
@@ -38,12 +38,12 @@ for j=1:length(sample_time)
     Gin = zeros(length(time),1);
 
     % Heat supply
-    Ts_max =  40;
+    Ts_max =  60;
     Tws = repmat([30*ones(ChangeTime/sample_time(j),1); Ts_max*ones(length(time)/nb-nb*ChangeTime/sample_time(j),1); Ts_max-20*ones(nb*ChangeTime/sample_time(j),1)],nb,1);
     flow_fraction = 0.5;
 
     % Init temperature 
-    Tb_ini =[25 27 26 23 20]';
+    Tb_ini =[23 27 26 25 25]';
     %Tb_ini =[30 30 30]';
     Tb_in = Tb_ini;
     Tb_vec = zeros(length(Tb_ini),length(time));
@@ -134,35 +134,21 @@ t_step = repmat(linspace(0,8-1,8),length(Tb_save_str{1}),1)';
 %%
 figure(2)
 subplot(3,1,1)
-stairs(linspace(0,length(Tb_vec_str{1}(1,:))-1,length(Tb_vec_str{1}(1,:))),Tb_vec_str{1}(1,:),'-b')
-hold on
-stairs(60*linspace(0,length(Tb_vec_str{2}(1,:))-1,length(Tb_vec_str{2}(1,:))),Tb_vec_str{2}(1,:)','-g')
-stairs(300*linspace(0,length(Tb_vec_str{3}(1,:))-1,length(Tb_vec_str{3}(1,:))),Tb_vec_str{3}(1,:)','-*y')
-stairs(900*linspace(0,length(Tb_vec_str{4}(1,:))-1,length(Tb_vec_str{4}(1,:))),Tb_vec_str{4}(1,:)','-*c')
-stairs(900*linspace(0,length(Tb_vec_str{4}(1,:))-1,length(Tb_vec_str{4}(1,:))),Tws(1:length(Tb_vec_str{4}(1,:)')),'r');
-ylim([20, 40])
-xlabel('time [s]')
-ylabel('T [°C]')
-legend('T_{return}','T_{floor}','T_{room}', 'T_{supply}')
-legend('\Delta_t = 1 s','\Delta_t = 1 min','\Delta_t = 5 min', '\Delta_t = 15 min')
-title('T_{return} change')
-hold off
-
-subplot(3,1,2)
 stairs(linspace(0,length(Tb_vec_str{1}(1,:))-1,length(Tb_vec_str{1}(1,:))),Tb_vec_str{1}(2,:),'-b')
 hold on
 stairs(60*linspace(0,length(Tb_vec_str{2}(1,:))-1,length(Tb_vec_str{2}(1,:))),Tb_vec_str{2}(2,:)','-g')
 stairs(300*linspace(0,length(Tb_vec_str{3}(1,:))-1,length(Tb_vec_str{3}(1,:))),Tb_vec_str{3}(2,:)','-*y')
 stairs(900*linspace(0,length(Tb_vec_str{4}(1,:))-1,length(Tb_vec_str{4}(1,:))),Tb_vec_str{4}(2,:)','-*c')
 stairs(900*linspace(0,length(Tb_vec_str{4}(1,:))-1,length(Tb_vec_str{4}(1,:))),Tws(1:length(Tb_vec_str{4}(1,:)')),'r');
-ylim([15, Ts_max+10])
+ylim([20, 40])
 xlabel('time [s]')
 ylabel('T [°C]')
+legend('T_{return}','T_{floor}','T_{room}', 'T_{supply}')
 legend('\Delta_t = 1 s','\Delta_t = 1 min','\Delta_t = 5 min', '\Delta_t = 15 min')
-title('T_{floor} change')
+title('T_{wh1} change')
 hold off
 
-subplot(3,1,3)
+subplot(3,1,2)
 stairs(linspace(0,length(Tb_vec_str{1}(1,:))-1,length(Tb_vec_str{1}(1,:))),Tb_vec_str{1}(3,:),'-b')
 hold on
 stairs(60*linspace(0,length(Tb_vec_str{2}(1,:))-1,length(Tb_vec_str{2}(1,:))),Tb_vec_str{2}(3,:)','-g')
@@ -173,7 +159,21 @@ ylim([15, Ts_max+10])
 xlabel('time [s]')
 ylabel('T [°C]')
 legend('\Delta_t = 1 s','\Delta_t = 1 min','\Delta_t = 5 min', '\Delta_t = 15 min')
-title('T_{room} change')
+title('T_{wh2} change')
+hold off
+
+subplot(3,1,3)
+stairs(linspace(0,length(Tb_vec_str{1}(1,:))-1,length(Tb_vec_str{1}(1,:))),Tb_vec_str{1}(4,:),'-b')
+hold on
+stairs(60*linspace(0,length(Tb_vec_str{2}(1,:))-1,length(Tb_vec_str{2}(1,:))),Tb_vec_str{2}(4,:)','-g')
+stairs(300*linspace(0,length(Tb_vec_str{3}(1,:))-1,length(Tb_vec_str{3}(1,:))),Tb_vec_str{3}(4,:)','-*y')
+stairs(900*linspace(0,length(Tb_vec_str{4}(1,:))-1,length(Tb_vec_str{4}(1,:))),Tb_vec_str{4}(4,:)','-*c')
+stairs(900*linspace(0,length(Tb_vec_str{4}(1,:))-1,length(Tb_vec_str{4}(1,:))),Tws(1:length(Tb_vec_str{4}(1,:)')),'r');
+ylim([15, Ts_max+10])
+xlabel('time [s]')
+ylabel('T [°C]')
+legend('\Delta_t = 1 s','\Delta_t = 1 min','\Delta_t = 5 min', '\Delta_t = 15 min')
+title('T_{return} change')
 hold off
 
 ha = axes('Position',[0 0 1 1],'Xlim',[0 1],'Ylim',[0 1],'Box','off','Visible','off','Units','normalized', 'clipping' , 'off');

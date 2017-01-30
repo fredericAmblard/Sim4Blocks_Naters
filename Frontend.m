@@ -1,44 +1,17 @@
-% Initialization function
-function [t,sample_time,k,Text,Text_ini,Tin_sp,rad_90,step,Qdot_dem, Design,T_primary] = system_init(model)
-% returns a structure containing initial values, system parameters and
-% state space matrices
-
-% Structure of variables for simulink
-s = struct;
-% Model Name
-M_name = model;
-
-% time step use for simulation
-step = get_param(M_name,'FixedStep');
-if isnan(step)
-    error('You must select a Fixed step solver !')
-elseif strcmp(step,'auto')
-    step = '1';
-else
-    step = str2double(get_param(M_name,'FixedStep'));
-end
-StartTime = str2double(get_param(M_name,'StartTime'));
-StopTime = prod(str2double(strsplit(get_param(M_name,'StopTime'),'*')));
-t = [StartTime:step:StopTime]';
-
-%time = str2double(strsplit(get_param('NatersV4','StopTime'),'*'));
-time = str2double(strsplit(get_param(M_name,'StopTime'),'*'));
-s.time = time;
-if time(1) == 24 % hours
-    sample_time = 3600;
-elseif time(1) == 4 % 1/4 hours
-    sample_time = 900;
-elseif time(1) == 12 % 5 minutes
-    sample_time = 300;
-elseif time(1) == 60 % 1 minutes
-    sample_time = 60;
-elseif time(1) == 3600 % secondes
-    sample_time = 1;
-else
-    error('The time sampling should be minutes, hours or day');
-end
+% M_file to run Simulink model
+clear;
+%% Simulation parameter
+Flag = 1; % flag 0 = off; 1 = on
+StartTime = 1;
+Nb_step = 24*10;
+sample_time = 60; % [s]
+Step = 1;
+Nb_run = 1;
+StopTime = strcat(num2str(sample_time),'*', num2str(Nb_step/Nb_run));
+t = [StartTime:Step:(StartTime-1+sample_time*Nb_step/Nb_run)]';
 
 %% Building
+% Vector of design parameters
 [Ab_c, Bb_c, Qdot_dem, Design] = get_state_input_mat_building(sample_time);
 
 % Continuous building model
@@ -130,9 +103,77 @@ L_ini = (Design(2)-Text_ini)/(Design(2)-Design(1));
 T_primary=10;
 
 
+%%
+mdl = bdroot;
+
+set_param(mdl, 'SolverType','Fixed-step','FixedStep',num2str(Step),...
+          'LoadInitialState', 'off', 'SaveCompleteFinalSimState', 'on',...
+          'FinalStateName', [mdl 'xFinal']);
+
+%[t1, Y1] = 
+resul = sim(mdl, 'StopTime',StopTime,'StartTime',num2str(StartTime));
+%plot(t1,Y1,'b');
+%aa=resul.get([mdl 'SimState']);
+
+% StartTime = StopTime;
+% StopTime = strcat(num2str(sample_time),'*', num2str(Nb_step));
+% %t = [(sample_time*Nb_step/2):Step:(StartTime-1+sample_time*Nb_step/2)]';
+% t = [str2num(StartTime):Step:str2num(StopTime)]';
+% Text = struct('time', t, 'signals', struct('values',Text_data((t(1):(t(1)+length(t))-1))));
+% rad_90 = struct('time', t, 'signals', struct('values', rad_90_data((t(1):(t(1)+length(t))-1))));
+% Text_ini = Text.signals.values(1);
+% % t_pause = t_pause +50;
+% 
+% % set_param(mdl, 'LoadInitialState', 'on', 'InitialState',...
+% % [mdl 'SimState']);
+% 
+% assignin('base', 'xFinal', resul.get([mdl 'xFinal']));
+% set_param(mdl, 'SaveFinalState', 'off', ...
+%           'LoadInitialState', 'on', 'InitialState', 'xFinal');
+% T_primary=12;
+% out1 = sim(mdl, 'StopTime',StopTime);
+% set_param(mdl, 'LoadInitialState', 'off', 'InitialState',...
+%  [mdl 'xFinal']);
+% %[t2, Y2] = sim(mdl, 'StopTime',StopTime,'StartTime',num2str(StartTime));
+% % resul2= sim(mdl, 'StopTime',StopTime,'StartTime',num2str(StartTime));
+% %hold on; 
+% %plot(t2,Y2,'r');
+% set_param(mdl, 'LoadInitialState', 'off');
 
 
 
 
 
-end
+
+
+
+%%
+% sim('NatersV4_cleanV2','SolverType','Fixed-step','StopTime',StopTime,'StartTime',num2str(StartTime),'FixedStep',num2str(Step),...
+%     'SaveState','on','StateSaveName','xout', 'SaveOutput','on','OutputSaveName','yout','SaveFormat', 'Dataset');
+% set_param('NatersV4_cleanV2', 'SimulationCommand', 'pause')
+% % StartTime = StopTime;
+% % StopTime = strcat(num2str(sample_time),'*', num2str(Nb_step));
+% % t = [(sample_time*Nb_step/2/Nb_run):Step:(StartTime-1+sample_time*Nb_step/2)]';
+% % Text = struct('time', t, 'signals', struct('values',Text_data((t(1):(t(1)+length(t))))'));
+% % rad_90 = struct('time', t, 'signals', struct('values', rad_90_data((t(1):(t(1)+length(t))))'));
+% % Text_ini = Text.signals.values(1);
+% T_primary=12;
+% t_pause = t_pause +50;
+% % Find all blocks of type 'Constant', with the name 'Constant1'.
+% 
+% foundBlock = find_system(gcb, 'BlockType', 'Constant', 'Name', 'time_pause');
+% % List the possible parameters for the found block. This step is only done
+% % to identify the name of the parameter that needs to be changed when you don't
+% % know for sure what the correct spelling might be.
+% % foundBlock is a cell array.
+% objParams = get_param(foundBlock{1}, 'ObjectParameters');
+% % After identifying the parameter 'Value', proceed to change it.
+% set_param(foundBlock{1}, 'Value', 't_pause');
+% 
+% %num2str(t_pause)
+% %set_param('NatersV4_cleanV2','t_pause',t_pause);
+% set_param('NatersV4_cleanV2', 'SimulationCommand', 'continue')
+% % sim('NatersV4_cleanV2','SolverType','Fixed-step','StopTime',StopTime,'StartTime',num2str(StartTime),'FixedStep',num2str(Step),...
+% %     'SaveState','on','StateSaveName','xout', 'SaveOutput','on','OutputSaveName','yout','SaveFormat', 'Dataset');
+% % %set_param('NatersV4_cleanV2', 'SimulationCommand', 'continue')
+% %set_param('NatersV4_cleanV2', 'SimulationCommand', 'pause')

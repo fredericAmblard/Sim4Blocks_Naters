@@ -1,4 +1,4 @@
-function [C_wr, mc_f, C_r, mdot_d_w, K_wf, K_fr, K_ra, cp_w, Q_D, Design] = get_param_building()
+function [C_wr, mc_f, C_r, mdot_d_w, K_wf, K_fr, K_ra, cp_w, Q_D, Design, L_pipes] = get_param_building()
 %GET_PARAM_BUILDING returns the parameters of the selected building
 
 cp_w = 4185;        % specific heat of water [J/kgK]
@@ -7,9 +7,9 @@ rho_air = 1.204;    % density of air [kg/m3]
 U_wf = 48;          % heat transfer coefficient of the distribution pipes [W/m2K] %48.2;
 U_fr = 11.7;        % heat transfer coefficient between floor and room [W/m2K]
 % \--> Source: On the heat transfer coefficients between heated/cooled radiant floorand room Tomasz Cholewaa
-U_ra = 0.8;        % heat transfer coefficient of the wall [W/m2K] 1.19
+U_ra = 1.19;        % heat transfer coefficient of the wall [W/m2K] 1.19
 A_fr = 350;         % floor surface [m2]
-A_ra = 1080;         % wall surface [m2] 2*2.4H*(6l + 8L)=67.2
+A_ra = 600;         % wall surface [m2]
 d_pipes = 0.013;   % internal diameter of the pipes [m]
 d_dz = 0.2;        % space between the pipes [m]
 L_pipes = A_fr/d_dz;    % length of the pipe [m]
@@ -31,8 +31,8 @@ Tin_D = 20;                     % Design outdoor temperature [K]
 Ts_D = 35;                      % Design supply temperature [K]  
 Tr_D = 28;                      % Design return temperature [K]
 Q_D = K_ra * (Tin_D - Text_D);  % Design heat demand [W]
-Design = [Text_D, Tin_D, Ts_D, Tr_D]; % Vector of design paramters  
 mdot_d_w = Q_D / ((Ts_D - Tr_D)*cp_w);     % Design mass flow [kg/s]
+Design = [Text_D, Tin_D, Ts_D, Tr_D, mdot_d_w]; % Vector of design paramters  
 tau_HP =3*60;                   % Time constant Heat Pump [s]
 C_ws = tau_HP * mdot_d_w * cp_w;           % thermal capacity supply water [J/K]
 C_wr = C_w; %(C_w - C_ws)*10;        % thermal capacity return water [J/K]

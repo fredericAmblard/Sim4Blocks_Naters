@@ -38,9 +38,9 @@ function K = hp_param(A) %HP_PARAM calculates the parameters K(1), K(2), K(3),
 % temperatures. Other values will be interpolated.
 
 
-K(1:3) = fminsearch(@(x) hp_param_func(x, A, 'heat'), [100 -10 100]);
-K(4:6) = fminsearch(@(x) hp_param_func(x, A, 'electric'), [100 -10 100]);
-K(7:9) = fminsearch(@(x) hp_param_func(x, A, 'absorbing'), [100 -10 100]);
+K(1:3) = fminsearch(@(x) hp_param_func(x, A, 'heat'), [100 -5 100]);
+K(4:6) = fminsearch(@(x) hp_param_func(x, A, 'electric'), [100 -5 100]);
+K(7:9) = fminsearch(@(x) hp_param_func(x, A, 'absorbing'), [100 -5 100]);
 
 end
 function f = hp_param_func(x, A, type)
